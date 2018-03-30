@@ -1,0 +1,6 @@
+[package]
+name = "powerpolynomials"
+version = "0.1.0"
+authors = ["Thom Wiggers <thom@thomwiggers.nl>"]
+
+[dependencies]
