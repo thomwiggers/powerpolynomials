@@ -56,13 +56,16 @@ fn get_prior_result(i: u64, target: u128, n: u32) -> ExponentMap {
     }
 }
 
-fn find_smallest_exponent_polynomial(tries: u32, target: u128, i: u64, n: u32) -> ExponentMap{
+fn find_smallest_exponent_polynomial(tries: u64, target: u128, i: u64, n: u32) -> ExponentMap{
     let mut best = get_prior_result(i, target, n);
     debug_assert_eq!(compute_result(&best, n), target);
-    for _ in 0..tries {
+    for try in 0..tries {
         let new_attempt = exponent_polynomial(target, i, n);
         debug_assert_eq!(compute_result(&new_attempt, n), target);
         best = get_best(best, new_attempt);
+        if try % 1000000 == 0{
+            println!("{} tries", try);
+        }
     }
     best
 }
@@ -74,6 +77,7 @@ fn sum_coefficients(result: &ExponentMap) -> u128 {
 
 fn get_best(a: ExponentMap, b: ExponentMap) -> ExponentMap {
     if sum_coefficients(&a) > sum_coefficients(&b) {
+        println!("Improved weight to {}!", sum_coefficients(&b));
         b
     } else {
         a
@@ -83,7 +87,7 @@ fn get_best(a: ExponentMap, b: ExponentMap) -> ExponentMap {
 
 /// Compute $a_0 × 1^n + a_1 × 2^n + \ldots + a_i × i^n = (i+1)^n$
 /// Return the coefficients a_0 .. a_i
-fn attack(tries: u32, i: u64, n: u32) -> ExponentMap {
+fn attack(tries: u64, i: u64, n: u32) -> ExponentMap {
     let target: u128 = (i as u128).pow(n);
     println!("Solving for i={}, n={}, i**n = {}", i, n, target);
 
@@ -112,29 +116,31 @@ fn store_results(results: &HashMap<u32, ExponentMap>) {
 
 fn main() {
 
-    if env::args().count() != 4 {
-        println!("Usage: {} i n tries", env::args().nth(0).unwrap());
+    if env::args().count() != 5 {
+        println!("Usage: {} i startn n tries", env::args().nth(0).unwrap());
         panic!("Missing arguments, got {}", env::args().count());
     }
     let n: u32;
     let i;
     let tries;
+    let start;
     {
         i = env::args().nth(1).unwrap().parse().unwrap();
-        n = env::args().nth(2).unwrap().parse().unwrap();
-        tries = env::args().nth(3).unwrap().parse().unwrap();
+        start = env::args().nth(2).unwrap().parse().unwrap();
+        n = env::args().nth(3).unwrap().parse().unwrap();
+        tries = env::args().nth(4).unwrap().parse().unwrap();
     }
     //load_stored_results();
 
     let mut results= HashMap::new();
-    for n in 2..n+1 {
+    for n in start..n+1 {
         results.insert(n, attack(tries, i, n));
     }
 
     //store_results(&results);
 
     println!("Solutions");
-    for k in 2..n+1 {
+    for k in start..n+1 {
         let result = results.get(&k).unwrap();
         print!("{}; ", k);
         for j in (2..i).rev() {
