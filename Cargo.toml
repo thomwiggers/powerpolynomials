@@ -4,3 +4,12 @@ version = "0.1.0"
 authors = ["Thom Wiggers <thom@thomwiggers.nl>"]
 
 [dependencies]
+lazy_static = "*"
+rand = "*"
+
+[dependencies.serde]
+version = "*"
+features = ["unstable"]
+
+[dependencies.serde_json]
+version = "*"
